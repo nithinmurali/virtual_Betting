@@ -35,7 +35,7 @@ public class SplashScreen extends Activity {
 	Boolean netPresent,error;
 	final Context context = this;
 	String uid,Rname,Lname;
-	int ibal;
+	int ibal,ldate;
 	
 	
 	@Override
@@ -151,7 +151,9 @@ public class SplashScreen extends Activity {
 							.getJSONObject("game_details");
 					Lname = jObj.getString("now_playing");
 					Rname = jObj.getString("earned");
-					
+					ldate = jObj.getInt("lastDate"); 
+					editor.putInt("lastAcessed", ldate);
+					editor.commit();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
