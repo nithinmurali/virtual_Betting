@@ -25,14 +25,17 @@ public class SplashScreen extends Activity {
 	
 	public static final String USER_DATA = "usr_data";
 	public static final String registerCode = "1234qwert"; // change it
+	
 	public static final String UserId_pref = "uid";
 	public static final String balence_pref = "amount";
 	private static String baseURL = "http://testapi.com/";
+	public static final Integer initialAmount = 1000;
 	
 	ConnectionDetector cd;
 	Boolean netPresent,error;
 	final Context context = this;
-	String uid;
+	String uid,Rname,Lname;
+	int ibal;
 	
 	
 	@Override
@@ -116,9 +119,10 @@ public class SplashScreen extends Activity {
 						//fetch userid
 						JSONObject json_user = json.getJSONObject("user");
 						uid = json_user.getString("uid");
+						ibal = initialAmount;
 						//save uid
 						editor.putString("uid", uid);
-						editor.putInt("balence", 1000);
+						editor.putInt("balence", initialAmount);
 						editor.commit();
 						Log.e("JSON", "> " +uid + "registred");
 
@@ -135,18 +139,39 @@ public class SplashScreen extends Activity {
 				
 			}
 			
-			
-			
-		return null;
-		}
+			//will fetch n update data needed for  main page
+			String json = jsonParser
+					.getJSONFromUrl(baseURL+"currentMatchDetails");
 
+			Log.e("Response: ", "> " + json);
+
+			if (json != null) {
+				try {
+					JSONObject jObj = new JSONObject(json)
+							.getJSONObject("game_details");
+					Lname = jObj.getString("now_playing");
+					Rname = jObj.getString("earned");
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			
+			return null;
+		}
+		
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
 			// After completing http call
 			// will close this activity and lauch main activity
 			Intent i = new Intent(SplashScreen.this, MainActivity.class);
-			i.putExtra("uid", uid);
+			i.putExtra(UserId_pref, uid);
+			i.putExtra(balence_pref, ibal);
+			i.putExtra("Lname", Lname);
+			i.putExtra("Rname", Rname);
 			startActivity(i);
 
 			// close this activity
