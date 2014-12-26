@@ -27,7 +27,7 @@ public class SplashScreen extends Activity {
 	public static final String registerCode = "1234qwert"; // change it
 	
 	public static final String UserId_pref = "uid";
-	public static final String balence_pref = "amount";
+	public static final String balence_pref = "balence";
 	private static String baseURL = "http://testapi.com/";
 	public static final Integer initialAmount = 1000;
 	
@@ -149,8 +149,8 @@ public class SplashScreen extends Activity {
 				try {
 					JSONObject jObj = new JSONObject(json)
 							.getJSONObject("game_details");
-					Lname = jObj.getString("now_playing");
-					Rname = jObj.getString("earned");
+					Lname = jObj.getString("left_name");
+					Rname = jObj.getString("right_name");
 					ldate = jObj.getInt("Date");
 					GameNum = jObj.getInt("GameNum");
 					editor.putInt("lastAcessed", ldate);

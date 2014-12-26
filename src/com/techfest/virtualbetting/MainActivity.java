@@ -1,6 +1,5 @@
 package com.techfest.virtualbetting;
 
-import org.apache.http.util.LangUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,11 +7,13 @@ import com.techfest.library.JsonParser;
 
 import android.support.v7.app.ActionBarActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,13 +28,16 @@ public class MainActivity extends ActionBarActivity {
 	private static String baseURL = "http://testapi.com/";
 	public static final Integer initialAmount = 1000;
 	
-	String status,lstatus,lnametxt,rnametxt;
-	Integer GameNum, curGameNum;
+	String status,lstatus,lname,rname,balence, uid;
+	Integer GameNum, curGameNum, betamt, ibal;
 	
-	TextView uid;
-	TextView balence,lname,rname;
-	EditText betamount;
-	Button bet;
+	TextView txtviewuid;
+	TextView txtviewBalence,txtviewLname,txtviewRname;
+	EditText edittxtBetamount;
+	Button btnbet;
+	
+	SharedPreferences prefs = getSharedPreferences(USER_DATA, MODE_PRIVATE);
+	SharedPreferences.Editor editor = getSharedPreferences(USER_DATA, MODE_PRIVATE).edit();
 	
 	
 	@Override
@@ -41,16 +45,37 @@ public class MainActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		bet = (Button)findViewById(R.id.button1);
-		lname = (TextView)findViewById(R.id.textView3);
-		rname = (TextView)findViewById(R.id.textView4);
+		btnbet = (Button)findViewById(R.id.button1);
+		txtviewLname = (TextView)findViewById(R.id.textView3);
+		txtviewRname = (TextView)findViewById(R.id.textView4);
+		edittxtBetamount = (EditText)findViewById(R.id.editText1);
 		
 		Intent i = getIntent();
-		lnametxt = i.getStringExtra("Lname");
-		rnametxt = i.getStringExtra("Rname");
+		uid = i.getStringExtra(UserId_pref);
+		lname = i.getStringExtra("Lname");
+		rname = i.getStringExtra("Rname");
+		ibal = i.getIntExtra(balence_pref, 0);
 		GameNum = i.getIntExtra("GameNum",0);
 		curGameNum = GameNum;
+		
+		new checkBet().execute();
 
+	}
+	
+	public void onBtnClicked(View v){
+	    betamt = Integer.parseInt(edittxtBetamount.getText().toString());
+	    ibal = ibal - betamt;
+	    editor.putInt("balence", betamt);
+	    editor.commit();
+	    
+	    //start result 
+	    Intent i = new Intent(MainActivity.this, ResultActivity.class);
+		i.putExtra(UserId_pref, uid);
+		i.putExtra(balence_pref, ibal);
+		startActivity(i);
+
+		// close this activity
+		finish();
 	}
 	
 	@Override
@@ -70,6 +95,35 @@ public class MainActivity extends ActionBarActivity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	//update the main page for new compi 
+	void initiate()
+	{
+		JsonParser jsonParser = new JsonParser();
+		String json = jsonParser
+				.getJSONFromUrl(baseURL+"currentMatchDetails");
+
+		Log.e("updated Response: ", "> " + json);
+
+		if (json != null) {
+			try {
+				JSONObject jObj = new JSONObject(json)
+						.getJSONObject("game_details");
+				lname = jObj.getString("left_name");
+				rname = jObj.getString("right_name");
+				GameNum = jObj.getInt("GameNum");
+				
+				txtviewLname.setText(lname);
+				txtviewRname.setText(rname);
+				btnbet.setEnabled(false);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
 	}
 	
 	private class checkBet extends AsyncTask<Void, Integer, Void>
@@ -140,31 +194,30 @@ public class MainActivity extends ActionBarActivity {
 				{
 					Log.d("error", "fetched jason is null");
 				}
-				//delay 2 sec
-				try {
+				//delay 2 seconds
+				try 
+				{
 			        Thread.sleep(2000);         
 			    } catch (InterruptedException e) {
 			       e.printStackTrace();
 			    }
 				
 			}
-	       return null;
+	       //return null;
 	    }
 
 	    protected void onProgressUpdate(Integer...a){
 	        Log.d("You are in progress update ... " , a[0].toString());
 	        if (a[0] == 1) {
 				//enable button
+	        	btnbet.setEnabled(true);
 	        	
 			} else if (a[0] == 0) {
 				//disable button
-				
+				btnbet.setEnabled(false);
 			}
 	    }
-	    
-	    protected void onPostExecute() {
-	        Log.d("error","async ends");
-	    }
+	   
 	}
 	
 }
