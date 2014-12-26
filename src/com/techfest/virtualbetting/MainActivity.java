@@ -1,11 +1,13 @@
 package com.techfest.virtualbetting;
 
+import org.apache.http.util.LangUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.techfest.library.JsonParser;
 
 import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,11 +27,11 @@ public class MainActivity extends ActionBarActivity {
 	private static String baseURL = "http://testapi.com/";
 	public static final Integer initialAmount = 1000;
 	
-	String status,lstatus;
-	Integer GameNum;
+	String status,lstatus,lnametxt,rnametxt;
+	Integer GameNum, curGameNum;
 	
 	TextView uid;
-	TextView balence,lanem,rname;
+	TextView balence,lname,rname;
 	EditText betamount;
 	Button bet;
 	
@@ -39,6 +41,16 @@ public class MainActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		bet = (Button)findViewById(R.id.button1);
+		lname = (TextView)findViewById(R.id.textView3);
+		rname = (TextView)findViewById(R.id.textView4);
+		
+		Intent i = getIntent();
+		lnametxt = i.getStringExtra("Lname");
+		rnametxt = i.getStringExtra("Rname");
+		GameNum = i.getIntExtra("GameNum",0);
+		curGameNum = GameNum;
+
 	}
 	
 	@Override
@@ -62,7 +74,6 @@ public class MainActivity extends ActionBarActivity {
 	
 	private class checkBet extends AsyncTask<Void, Integer, Void>
 	{
-		private Integer curGameNum; // to be set to game num intially
 		
 		
 	    protected void onPreExecute (){
